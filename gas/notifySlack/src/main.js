@@ -1,7 +1,34 @@
 var global = this;function throwAwayTheTrash() {
 }
 function notifySalesInfoUpdating() {
+}
+function notifyChatWorkMessage() {
 }(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict";
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var ChatWork = exports.ChatWork = function ChatWork() {
+    _classCallCheck(this, ChatWork);
+
+    this.name = "ChatWork";
+    this.prefix = "https://api.chatwork.com/v2/rooms/";
+    this.suffix = "/messages?force=0";
+    this.chatWorkToken = "4f54b7e845391777495771a884198e15";
+    // 寺田さんとやりとり用、スマート物流用、東本さん用、アマゾンSEO用、マイチャット
+    this.roomIDList = ["113000269", "115867174", "119617629", "119805642", "105028009"];
+    this.params = {
+        headers: { "X-ChatWorkToken": this.chatWorkToken },
+        method: "get"
+    };
+    this.sendURL = "https://hooks.slack.com/services/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";
+};
+
+},{}],2:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -73,7 +100,7 @@ var Emilia = exports.Emilia = (function () {
   return Emilia;
 })();
 
-},{"../lib/Util":4}],2:[function(require,module,exports){
+},{"../lib/Util":5}],3:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -122,7 +149,7 @@ var NoSmart = exports.NoSmart = (function () {
     return NoSmart;
 })();
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -164,7 +191,7 @@ var NotifySlack = exports.NotifySlack = (function () {
     return NotifySlack;
 })();
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -204,7 +231,7 @@ var Util = exports.Util = (function () {
     return Util;
 })();
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (global){
 // ###########################
 // レムのつぶやき
@@ -217,6 +244,8 @@ var Emilia = require("./bot/Emilia").Emilia;
 var NoSmart = require("./bot/NoSmart").NoSmart;
 
 var NotifySlack = require("./lib/NotifySlack").NotifySlack;
+
+var ChatWork = require("./bot/ChatWork").ChatWork;
 
 global.throwAwayTheTrash = function () {
     var emilia = new Emilia();
@@ -232,13 +261,24 @@ global.notifySalesInfoUpdating = function () {
     notifySlack.notify(noSmart.sendURL, message);
 };
 
-// ###########################
-// 一人さんのつぶやき
-// ###########################
-// function tweetByHitori() {
-//     let hitori = new Hitori();
-//     hitori.tweet();
-// }
+global.notifyChatWorkMessage = function () {
+    var chatWork = new ChatWork();
+    var notifySlack = new NotifySlack();
+    var roomIDList = chatWork.roomIDList;
+    for (var i = 0; i < roomIDList.length; i++) {
+        var url = "" + chatWork.prefix + "" + roomIDList[i] + "" + chatWork.suffix;
+        var strRespons = UrlFetchApp.fetch(url, chatWork.params);
+        if (strRespons != "") {
+            var json = JSON.parse(strRespons.getContentText());
+            if (json == "") return;
+            for (var _i in json) {
+                var message = "";
+                message = message + json[_i].account.name + "\n```" + json[_i].body + "```\n";
+                notifySlack.notify(chatWork.sendURL, message);
+            }
+        }
+    }
+};
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./bot/Emilia":1,"./bot/NoSmart":2,"./lib/NotifySlack":3}]},{},[5]);
+},{"./bot/ChatWork":1,"./bot/Emilia":2,"./bot/NoSmart":3,"./lib/NotifySlack":4}]},{},[6]);
