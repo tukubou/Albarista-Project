@@ -5,6 +5,7 @@
 import {Emilia} from './bot/Emilia';
 import {NoSmart} from './bot/NoSmart';
 import {NotifySlack} from './lib/NotifySlack';
+import {ChatWork} from './bot/ChatWork';
 
 global.throwAwayTheTrash = () => {
     const emilia = new Emilia();
@@ -20,10 +21,21 @@ global.notifySalesInfoUpdating = () => {
     notifySlack.notify(noSmart.sendURL, message);
 };
 
-// ###########################
-// 一人さんのつぶやき
-// ###########################
-// function tweetByHitori() {
-//     let hitori = new Hitori();
-//     hitori.tweet();
-// }
+global.notifyChatWorkMessage = () => {
+    const chatWork = new ChatWork();
+    const notifySlack = new NotifySlack();
+    const roomIDList = chatWork.roomIDList;
+    for(let i = 0; i < roomIDList.length; i ++) {
+        const url = `${chatWork.prefix}${roomIDList[i]}${chatWork.suffix}`;
+        const strRespons = UrlFetchApp.fetch(url, chatWork.params);
+        if (strRespons != "") {
+            const json = JSON.parse(strRespons.getContentText());
+            if(json == "") return;
+            for(let i in json){
+                let message = '';
+                message = message + json[i].account.name + "\n```" + json[i].body + "```\n";
+                notifySlack.notify(chatWork.sendURL, message);
+            }
+        }
+    }
+};
