@@ -43,6 +43,15 @@ export class MyGmailApp{
         });
         return threads;
     }
+    _getUnreadThreadsByORQuery(query) {
+        let array = [];
+        const threads = this._getThreads(query);
+        return this._.filter(threads, function(thread){
+            return thread.isUnread();
+        });
+    }
+
+
     _isLimitOver(thread, xday) {
         const now = Moment.moment();
         const mailReachDate = Moment.moment(thread.getLastMessageDate());
@@ -65,5 +74,22 @@ export class MyGmailApp{
             }
         });
         return retStr;
+    }
+    _generageQueryOR(array) {
+        const modifyArray = this._.map(array, function(keyword){
+            return `"${keyword}"`; // ""でそれぞれの要素をくくる。
+        });
+        return `(${modifyArray.join(' OR ')})`;
+    }
+    _generageQueryAND(array) {
+        const modifyArray = this._.map(array, function(keyword){
+            return `"${keyword}"`; // ""でそれぞれの要素をくくる。
+        });
+        return `(${modifyArray.join(' AND ')})`;
+    }
+    _makeThreadsReadStatus(threads) {
+        this._.each(threads,function(thread, i){
+            thread.markRead();
+        });
     }
 }

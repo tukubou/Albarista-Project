@@ -1,4 +1,12 @@
-var global = this;function archiveDailyThreads() {
+var global = this;function gApp() {
+}
+function notifySlack() {
+}
+function gmail() {
+}
+function archiveDailyThreads() {
+}
+function notifyInvoices() {
 }
 function deleteThreads() {
 }
@@ -24,17 +32,23 @@ var Gmail = exports.Gmail = (function () {
     }
 
     _createClass(Gmail, {
+        _generateInvoiceMessage: {
+            value: function _generateInvoiceMessage(threads) {
+                if (threads.length === 0) {
+                    return "【請求書通知】\n　請求書に関する未読のスレッドはありませんでした。";
+                }
+                var retStr = "【請求書通知】\n　以下のスレッドたち `" + threads.length + "` 件を既読にしました。\n";
+                retStr += this._generateMessageItemList(threads);
+                return retStr;
+            }
+        },
         _generateDeleteMessage: {
             value: function _generateDeleteMessage(deletedThreads) {
                 if (deletedThreads.length === 0) {
                     return "【スレッド削除】\n　削除できるスレッドはありませんでした。";
                 }
-                var retStr = "以下のスレッドたち `" + deletedThreads.length + "` )件を削除しました。\n ```\n";
-                this._.each(deletedThreads, function (thread, i) {
-                    retStr += "(" + (i + 1) + ") " + thread.getFirstMessageSubject() + "\n";
-                    //thread.moveToTrash();
-                });
-                retStr += "```";
+                var retStr = "【スレッド削除】\n　以下のスレッドたち `" + deletedThreads.length + "` 件を削除しました。\n";
+                retStr += this._generateMessageItemList(deletedThreads);
                 return retStr;
             }
         },
@@ -43,13 +57,19 @@ var Gmail = exports.Gmail = (function () {
                 if (achiveThreads.length === 0) {
                     return "【スレッドアーカイブ】\n　アーカイブできるスレッドはありませんでした。";
                 }
-                var retStr = "以下のスレッドたち `" + achiveThreads.length + "` )件をアーカイブしました。\n ```\n";
-                this._.each(achiveThreads, function (thread, i) {
-                    retStr += "(" + (i + 1) + ") " + thread.getFirstMessageSubject() + "\n";
-                    //thread.moveToTrash();
-                });
-                retStr += "```";
+                var retStr = "【スレッドアーカイブ】\n　以下のスレッドたち `" + achiveThreads.length + "` 件をアーカイブしました。\n";
+                retStr += this._generateMessageItemList(achiveThreads);
                 return retStr;
+            }
+        },
+        _generateMessageItemList: {
+            value: function _generateMessageItemList(threads) {
+                var itemList = "\n";
+                this._.each(threads, function (thread, i) {
+                    itemList += ["(" + (i + 1) + ") " + thread.getFirstMessageSubject(), "　" + thread.getPermalink()].join("\n");
+                    itemList += "\n";
+                });
+                return "```" + itemList + "```";
             }
         },
         _generateDeleteDraftMessage: {
@@ -135,6 +155,15 @@ var MyGmailApp = exports.MyGmailApp = (function () {
                 return threads;
             }
         },
+        _getUnreadThreadsByORQuery: {
+            value: function _getUnreadThreadsByORQuery(query) {
+                var array = [];
+                var threads = this._getThreads(query);
+                return this._.filter(threads, function (thread) {
+                    return thread.isUnread();
+                });
+            }
+        },
         _isLimitOver: {
             value: function _isLimitOver(thread, xday) {
                 var now = Moment.moment();
@@ -163,6 +192,29 @@ var MyGmailApp = exports.MyGmailApp = (function () {
                     }
                 });
                 return retStr;
+            }
+        },
+        _generageQueryOR: {
+            value: function _generageQueryOR(array) {
+                var modifyArray = this._.map(array, function (keyword) {
+                    return "\"" + keyword + "\""; // ""でそれぞれの要素をくくる。
+                });
+                return "(" + modifyArray.join(" OR ") + ")";
+            }
+        },
+        _generageQueryAND: {
+            value: function _generageQueryAND(array) {
+                var modifyArray = this._.map(array, function (keyword) {
+                    return "\"" + keyword + "\""; // ""でそれぞれの要素をくくる。
+                });
+                return "(" + modifyArray.join(" AND ") + ")";
+            }
+        },
+        _makeThreadsReadStatus: {
+            value: function _makeThreadsReadStatus(threads) {
+                this._.each(threads, function (thread, i) {
+                    thread.markRead();
+                });
             }
         }
     });
@@ -226,33 +278,36 @@ var NotifySlack = require("./lib/NotifySlack").NotifySlack;
 
 var Gmail = require("./bot/Gmail").Gmail;
 
+// ここだけ共通で使うオブジェクトなのでグローバルm(_ _)m
+global.gApp = new MyGmailApp();
+global.notifySlack = new NotifySlack();
+global.gmail = new Gmail();
 /**
  * [archiveDailyMail 受信してから一日以上経過したメールをアーカイブする関数]
  */
 global.archiveDailyThreads = function () {
-    var gApp = new MyGmailApp();
-    var notifySlack = new NotifySlack();
-    var gmail = new Gmail();
     var achiveThreads = gApp._archiveThreadsXdayAgo(GmailApp.getInboxThreads(), 1, true);
     var message = gmail._generateAchiveMessage(achiveThreads);
     notifySlack.notify(gmail.sendURL, message);
 };
 
+global.notifyInvoices = function () {
+    var query = gApp._generageQueryOR(["Apple からの領収書です", "残高不足請求のお知らせ", "手数料明細書"]);
+    var threads = gApp._getUnreadThreadsByORQuery(query);
+    gApp._makeThreadsReadStatus(threads);
+    var message = gmail._generateInvoiceMessage(threads);
+    notifySlack.notify(gmail.sendURL, message);
+};
+
 global.deleteThreads = function () {
-    var notifySlack = new NotifySlack();
-    var gmail = new Gmail();
-    var gApp = new MyGmailApp();
     //配列内の""は残しておく // Gmailの検索条件
-    var query = "(" + ["【Money Forward】\""].join(" OR ") + ")";
+    var query = gApp._generageQueryOR(["【Money Forward】"]);
     var deletedThreads = gApp._deleteThreadsByORQuery(query);
     var message = gmail._generateDeleteMessage(deletedThreads);
     notifySlack.notify(gmail.sendURL, message);
 };
 
 global.deleteDrafts = function () {
-    var notifySlack = new NotifySlack();
-    var gmail = new Gmail();
-    var gApp = new MyGmailApp();
     var deletedNum = gApp._deleteDrafts();
     var message = gmail._generateDeleteDraftMessage(deletedNum);
     notifySlack.notify(gmail.sendURL, message);
