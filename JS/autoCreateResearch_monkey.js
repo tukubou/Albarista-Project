@@ -17,26 +17,25 @@
          // 検索結果画面
         localStorage.clear();
         const div_info_bar = /** @type {HTMLElement} */ (document.querySelector("[id=s-result-info-bar-content]"));
-        var pTag = document.createElement('p');
-        var bTag = document.createElement('button');
+        let bTag = document.createElement('button');
         bTag.textContent = "リサーチ管理表作成実行";
-        bTag.onclick= function() {
-            var index = 0;
-            const  intervalId =  setInterval(function(){
+        bTag.onclick = function() {
+            let index = 0;
+            const intervalId = setInterval(function(){
                 const result_ul = /** @type {HTMLElement} */ (document.querySelector("[id=s-results-list-atf]"));
                 const result_li = result_ul.getElementsByTagName('li');
                 const container = result_li[index].getElementsByClassName("s-item-container");
                 const asin = result_li[index].getAttribute("data-asin");
                 localStorage.setItem(index,asin);
                 const spacing_base = container[0].getElementsByClassName("a-spacing-base");
-                const  position_relative = spacing_base[0].getElementsByTagName("div");
+                const position_relative = spacing_base[0].getElementsByTagName("div");
                 const a = position_relative[0].getElementsByTagName("a");
                 a[0].click();
                 index++;
                 if(index > 5){ // 一旦5商品
                     clearInterval(intervalId);
                 }
-            },  2000);
+            }, 2000);
         };
         div_info_bar.appendChild(bTag);
     }else {
