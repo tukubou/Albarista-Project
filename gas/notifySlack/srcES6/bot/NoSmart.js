@@ -1,7 +1,7 @@
 export class NoSmart{
     constructor(color){
         this.name = "NoSmart";
-        this.sendURL = 'https://hooks.slack.com/services/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';
+        this.sendURL = 'https://hooks.slack.com/services/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';
         this.settings = {
             CHECK_NUM: 10,
             FILE_ID: '1x-cjBPa238uAamBcvhfIjDC5YPElPiBvupXBgaieuiU',
