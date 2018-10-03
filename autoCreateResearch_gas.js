@@ -1,11 +1,13 @@
 function doPost(e) {
   const params = JSON.parse(e.postData.getDataAsString());
   const table_index = 14; // ライバルセラーテーブルの先頭行
+  const index = params.index; // 行数
   const brand = params.brand; // ブランド
   const price = params.price; // 販売価格
   const ranking = params.ranking;　// ランキング
   const category = params.category; // 大カテゴリ
   const url = params.url;　　　　　　 // URL
+  const image = params.image;       // 画像URL
   const review_good = params.review.good;　// goodレビュー数
   const review_bad = params.review.bad;　　// badレビュー数
   
@@ -19,7 +21,7 @@ function doPost(e) {
   const sheet = ss.getSheetByName("シート1");
   // 作成先情報を取得
   const ssId = sheet.getRange('A2').getValues();
-  const sheetId = sheet.getRange('B2').getValues();
+  var sheetId = sheet.getRange('B2').getValue();
   // 作成先シートを取得
   const ss_copyTo = SpreadsheetApp.openById(ssId);
   const sheet_copyTo = ss_copyTo.getSheetByName(sheetId);
@@ -40,6 +42,12 @@ function doPost(e) {
     data_index += 1;
   }
   // データ入力
+  if(sheet_copyTo.getRange(3,5).getValue() == ""){
+    // 商品名が空白の場合はカテゴリ、画像も合わせて設定する
+    sheet_copyTo.getRange(3,5).setValue(sheetId.replace("【リサーチ】",""));
+    sheet_copyTo.getRange(4,5).setValue(category);
+    sheet_copyTo.getRange(4,2).setFormula("=IMAGE(\""+image+"\")");
+  }
   sheet_copyTo.getRange(data_index,3).setValue(brand);
   sheet_copyTo.getRange(data_index,4).setValue(price);
   sheet_copyTo.getRange(data_index,5).setValue(category);
