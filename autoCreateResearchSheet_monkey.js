@@ -9,7 +9,6 @@
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
-
 (async() => {
     const href = location.href;
     await wait(0.7);
@@ -61,6 +60,7 @@
         }
     }
     function getSelerData(key) {
+      　　// 商品詳細ページの情報取得
         const rankingLimit = 3000;
         const divOrganizations = /** @type {HTMLElement} */ (document.querySelector("[class='organizationInfo_description']"));
         const aBrand = /** @type {HTMLElement} */ (document.querySelector("[id='bylineInfo']"));
