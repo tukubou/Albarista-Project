@@ -9,6 +9,9 @@
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
+/**
+@matchのページに遷移したら動作
+**/
 (async() => {
     const href = location.href;
     await wait(0.7);
@@ -59,8 +62,11 @@
             }
         }
     }
-    function getSelerData(key) {
-      　　// 商品詳細ページの情報取得
+    /**
+     商品詳細ページの情報取得
+    @param : index 何個目の商品か
+    **/
+    function getSelerData(index) {
         const rankingLimit = 3000;
         const divOrganizations = /** @type {HTMLElement} */ (document.querySelector("[class='organizationInfo_description']"));
         const aBrand = /** @type {HTMLElement} */ (document.querySelector("[id='bylineInfo']"));
@@ -91,12 +97,15 @@
         const reviewBad = Math.round(( map.get('1star') + map.get('2star') + map.get('3star')) * map.get('totalReviewCount') / 100);
 
         // windows だと ¥" でエスケープ　macだと \" でエスケープ
-        const params = `{\"index\": ${key} ,\"brand\":\"${aBrand.textContent}\",\"price\": ${ Number(spanPrice.textContent.replace( /￥/g , "" ).replace( /,/g , "" ))} ,
+        const params = `{\"index\": ${index} ,\"brand\":\"${aBrand.textContent}\",\"price\": ${ Number(spanPrice.textContent.replace( /￥/g , "" ).replace( /,/g , "" ))} ,
         \"category\":\"${ category}\",\"ranking\": ${ranking} ,\"rankingLimit\": ${rankingLimit} ,\"url\":\"${href}\",\"image\":\"${image.src}\",\"review\":{\"good\": ${reviewGood} ,\"bad\": ${reviewBad} }}`;
         post(params);
     }
+    /**
+     GAS側に投げるリクエストの作成&送信
+    @param params クエリパラメータ
+    **/
     function post(params) {
-        // GAS側に投げる
         GM_xmlhttpRequest( {
             method: "POST",
             url: "https://script.google.com/macros/s/AKfycbxO08pz9Fu0oUfiJS-GhNK6PeQNoHPpn5ni5H1cY4ZwCxTLaf8/exec",

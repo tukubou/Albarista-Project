@@ -37,14 +37,14 @@ function doPost(e) {
     sheetCopyTo.getRange('E4').setValue(params.category);
     sheetCopyTo.getRange('B4').setFormula("=IMAGE(\"" + params.image + "\")");
   }
-  sheetCopyTo.getRange(dataIndex, 3).setValue(params.brand);
-  sheetCopyTo.getRange(dataIndex, 4).setValue(params.price);
-  sheetCopyTo.getRange(dataIndex, 5).setValue(params.category);
-  sheetCopyTo.getRange(dataIndex, 6).setValue(params.ranking);
-  sheetCopyTo.getRange(dataIndex, 13).setValue(params.review.good);
-  sheetCopyTo.getRange(dataIndex, 14).setValue(params.review.bad);
-  sheetCopyTo.getRange(dataIndex, 16).setValue(params.url);
-  sheetCopyTo.getRange(dataIndex, 17).setValue(" ");
+  sheetCopyTo.getRange('C' + dataIndex).setValue(params.brand);
+  sheetCopyTo.getRange('D' + dataIndex).setValue(params.price);
+  sheetCopyTo.getRange('E' + dataIndex).setValue(params.category);
+  sheetCopyTo.getRange('F' + dataIndex).setValue(params.ranking);
+  sheetCopyTo.getRange('M' + dataIndex).setValue(params.review.good);
+  sheetCopyTo.getRange('N' + dataIndex).setValue(params.review.bad);
+  sheetCopyTo.getRange('P' + dataIndex).setValue(params.url);
+  sheetCopyTo.getRange('Q' + dataIndex).setValue(" ");
   
   return "success";
 }
