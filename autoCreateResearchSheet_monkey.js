@@ -25,8 +25,7 @@
             if(confirm("作成実行")) {
                 let index = 0;
                  bTag.textContent = "リサーチ管理表作成中";
-                const ulResult = /** @type {HTMLElement} */ (document.querySelector("[id=s-results-list-atf]"));
-                const liResult = ulResult.getElementsByClassName("s-result-item s-result-card-for-container-noborder s-carded-grid celwidget");
+                const liResult = /** @type {HTMLElement} */ (document.querySelectorAll("[data-action=sx-detail-display-trigger]"));
                 const intervalId = setInterval(function() {
                      bTag.textContent = "リサーチ管理表作成中    :    " + (index+1) + "件目";
                     if(liResult[index].getElementsByTagName("h5").length == 0) {
@@ -67,7 +66,7 @@
     @param : index 何個目の商品か
     **/
     function getSelerData(index) {
-        const rankingLimit = 3000;
+        const rankingLimit = 10000;
         const divOrganizations = /** @type {HTMLElement} */ (document.querySelector("[class='organizationInfo_description']"));
         const aBrand = /** @type {HTMLElement} */ (document.querySelector("[id='bylineInfo']"));
         const spanPrice = /** @type {HTMLElement} */ (document.querySelector("[id='priceblock_ourprice']"));
