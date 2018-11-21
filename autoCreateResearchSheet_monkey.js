@@ -15,7 +15,7 @@
 
 (async() => {
     const rankingLimit = 8000; 　//リサーチ管理表に追加するランキングの上限
-    const waitTime = 30000;　　　//待ち時間　通信速度に依存
+    const waitTime = 10000;　　　//待ち時間　通信速度に依存
     const href = location.href;
     await wait(0.7);
      if (href.includes("https://www.amazon.co.jp/s/")) {
@@ -80,7 +80,6 @@
         let price = spanPrice.textContent.replace( /￥/g , "" ).replace( /,/g , "" );
         console.log(price);
         if ( price.match(/ -  /)) {
-            //strにhogeを含む場合の処理
             const low = price.split(" -  ")[0];
             const high = price.split(" -  ")[1];
             price = (Number(low)+Number(high))/2
