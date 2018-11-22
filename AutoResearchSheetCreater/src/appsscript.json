@@ -1,0 +1,26 @@
+{
+  "timeZone": "Asia/Tokyo",
+  "dependencies": {
+    "libraries": [
+        {
+            "userSymbol": "SlackApp",
+            "libraryId": "1on93YOYfSmV92R5q59NpKmsyWIQD8qnoLYk-gkQBI92C58SPyA2x1-bq",
+            "version": "21",
+            "developmentMode": true
+        },
+        {
+            "userSymbol": "Underscore",
+            "libraryId": "M3i7wmUA_5n0NSEaa6NnNqOBao7QLBR4j",
+            "version": "2",
+            "developmentMode": true
+        },
+        {
+            "userSymbol": "Moment",
+            "libraryId": "MHMchiX6c1bwSqGM1PZiW_PxhMjh3Sh48",
+            "version": "9",
+            "developmentMode": true
+        }
+    ]
+  },
+  "exceptionLogging": "STACKDRIVER"
+}
