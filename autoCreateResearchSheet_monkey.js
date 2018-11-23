@@ -107,8 +107,6 @@
         const reviewBad = Math.round(( map.get('1star') + map.get('2star') + map.get('3star')) * map.get('total-review-count') / 100);
 
         // windows だと ¥" でエスケープ　macだと \" でエスケープ
-   ///    const params = `{\"index\": ${index} ,\"brand\":\"${aBrand.textContent}\",\"price\": ${ price} ,\"category\":\"${ category}\",
-//\"ranking\": ${ranking} ,\"rankingLimit\": ${rankingLimit} ,\"url\":\"${href}\",\"image\":\"${image.src}\",\"review\":{\"good\": ${reviewGood} ,\"bad\": ${reviewBad} }}`;
         const params = [
             `{\"index\": ${index}`,
             `\"brand\": \"${aBrand.textContent}\"`,
