@@ -12,10 +12,10 @@
 /**
 @matchのページに遷移したら動作
 **/
-
 (async() => {
-    const rankingLimit = 8000; 　//リサーチ管理表に追加するランキングの上限
-    const waitTime = 10000;　　　//待ち時間　通信速度に依存
+    const rankingLimit = 8000; 　//　リサーチ管理表に追加するランキングの上限
+    const waitTime = 8000;　　　//　待ち時間　通信速度に依存
+    const gasUrl = "https://script.google.com/macros/s/AKfycbwfO3qjSZaU3A9Rf_vwmOyO6hnZEw4xIcq7tzr9yg/exec";　// 参照するスプレッドシートのwebアプリケーションURL
     const href = location.href;
     await wait(0.7);
      if (href.includes("https://www.amazon.co.jp/s/")) {
@@ -31,7 +31,7 @@
                 const liResult = /** @type {HTMLElement} */ (document.querySelectorAll("li[id*='result_']"));
                 const intervalId = setInterval(function() {
                      bTag.textContent = "リサーチ管理表作成中    :    " + (index+1) + "件目";
-                    if(liResult[index].getElementsByTagName("h5").length == 0) {
+                    if(liResult[index].getElementsByTagName("h5").length === 0) {
                         // スポンサープロダクトの表示がない場合
                         const asin = liResult[index].getAttribute("data-asin");
                         localStorage.setItem(index,asin);
@@ -55,7 +55,7 @@
             if(href.includes(localStorage.getItem(key))) {
                 // ランキング読み込みのためwaitは長め
                 await wait(waitTime);
-                getSelerData(key,rankingLimit);
+                getSelerData(key,rankingLimit, gasUrl);
                 localStorage.removeItem(key);
                 await wait(1000);
                 window.close();
@@ -66,8 +66,10 @@
     /**
      商品詳細ページの情報取得
     @param : index 何個目の商品か
+    @param : rankingLimit リサーチ管理表に記載するランキングの上限
+    @param : gasUrl post先のURL
     **/
-    function getSelerData(index, rankingLimit) {
+    function getSelerData(index, rankingLimit, gasUrl) {
         const divOrganizations = /** @type {HTMLElement} */ (document.querySelector("[class='organizationInfo_description']"));
         const aBrand = /** @type {HTMLElement} */ (document.querySelector("[id='bylineInfo']"));
         const spanPrice = /** @type {HTMLElement} */ (document.querySelector("[id='priceblock_ourprice']"));
@@ -78,12 +80,11 @@
         const ranking = spanEnrichResult[1].textContent.replace( /位/g , "" ).replace( /,/g , "" );
         const image = /** @type {HTMLElement} */ (document.querySelector("[id='landingImage']"));
         let price = spanPrice.textContent.replace( /￥/g , "" ).replace( /,/g , "" );
-        console.log(price);
-        if ( price.match(/ -  /)) {
+        if ( price.match(/ -  /)　) {
             const low = price.split(" -  ")[0];
             const high = price.split(" -  ")[1];
-            price = (Number(low)+Number(high))/2
-        }else {
+            price = (Number(low)　+　Number(high))　/　2
+        }　else {
             price = Number(price);
         }
 
@@ -106,18 +107,31 @@
         const reviewBad = Math.round(( map.get('1star') + map.get('2star') + map.get('3star')) * map.get('total-review-count') / 100);
 
         // windows だと ¥" でエスケープ　macだと \" でエスケープ
-        const params = `{\"index\": ${index} ,\"brand\":\"${aBrand.textContent}\",\"price\": ${ price} ,\"category\":\"${ category}\",
-\"ranking\": ${ranking} ,\"rankingLimit\": ${rankingLimit} ,\"url\":\"${href}\",\"image\":\"${image.src}\",\"review\":{\"good\": ${reviewGood} ,\"bad\": ${reviewBad} }}`;
-        post(params);
+   ///    const params = `{\"index\": ${index} ,\"brand\":\"${aBrand.textContent}\",\"price\": ${ price} ,\"category\":\"${ category}\",
+//\"ranking\": ${ranking} ,\"rankingLimit\": ${rankingLimit} ,\"url\":\"${href}\",\"image\":\"${image.src}\",\"review\":{\"good\": ${reviewGood} ,\"bad\": ${reviewBad} }}`;
+        const params = [
+            `{\"index\": ${index}`,
+            `\"brand\": \"${aBrand.textContent}\"`,
+            `\"price\": ${ price}`,
+            `\"category\": \"${ category}\"`,
+            `\"ranking\": ${ranking}`,
+            `\"rankingLimit\": ${rankingLimit}`,
+            `\"url\": \"${href}\"`,
+            `\"image\": \"${image.src}\"`,
+            `\"review\": {\"good\": ${reviewGood}`,
+            `\"bad\": ${reviewBad} }}`
+        ].join(', ');
+        post(params, gasUrl);
     }
     /**
      GAS側に投げるリクエストの作成&送信
-    @param params クエリパラメータ
+    @param : params クエリパラメータ
+    @param : gasUrl post先のURL
     **/
-    function post(params) {
+    function post(params, gasUrl) {
         GM_xmlhttpRequest( {
             method: "POST",
-            url: "https://script.google.com/macros/s/AKfycbwfO3qjSZaU3A9Rf_vwmOyO6hnZEw4xIcq7tzr9yg/exec",
+            url: gasUrl,
             data: params,
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -130,4 +144,3 @@
         return new Promise(r => setTimeout(r, ms));
     }
 })();
-
