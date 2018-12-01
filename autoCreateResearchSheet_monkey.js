@@ -15,7 +15,7 @@
 (async() => {
     const rankingLimit = 8000; 　//　リサーチ管理表に追加するランキングの上限
     const waitTime = 8000;　　　//　待ち時間　通信速度に依存
-    const gasUrl = "https://script.google.com/macros/s/AKfycbwfO3qjSZaU3A9Rf_vwmOyO6hnZEw4xIcq7tzr9yg/exec";　// 参照するスプレッドシートのwebアプリケーションURL
+    const gasWebApplicationUrl = "https://script.google.com/macros/s/AKfycbwfO3qjSZaU3A9Rf_vwmOyO6hnZEw4xIcq7tzr9yg/exec";　// 参照するスプレッドシートのwebアプリケーションURL
     const href = location.href;
     await wait(0.7);
      if (href.includes("https://www.amazon.co.jp/s/")) {
